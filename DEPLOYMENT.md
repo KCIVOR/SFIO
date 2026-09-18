@@ -52,7 +52,7 @@ GitHub Actions (.github/workflows/deploy.yml)
 Configured under **Repository Settings ➔ Secrets and variables ➔ Actions**:
 
 1. **Secrets**:
-   - `CPANEL_TOKEN`: The API token created inside cPanel (**Manage API Tokens**).
+   - `CPANEL_DEPLOY` (or `CPANEL_TOKEN`): The API token created inside cPanel (**Manage API Tokens**).
 2. **Variables (Optional)**:
    - `CPANEL_HOST`: Override the default host if the server URL or domain changes (defaults to `https://srv489465.hstgr.cloud:2083`).
 

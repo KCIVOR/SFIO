@@ -24,17 +24,16 @@ jobs:
     steps:
       - name: Validate secrets
         run: |
-          if [ -z "${{ secrets.CPANEL_TOKEN }}" ]; then
-            echo "::error::CPANEL_TOKEN secret is empty or inaccessible in this workflow job!"
-            echo "Ensure CPANEL_TOKEN is added to: Settings -> Secrets and variables -> Actions -> Repository secrets."
+          if [ -z "${{ secrets.CPANEL_DEPLOY || secrets.CPANEL_TOKEN }}" ]; then
+            echo "::error::Neither CPANEL_DEPLOY nor CPANEL_TOKEN secret is accessible in this workflow job!"
             exit 1
           fi
-          echo "CPANEL_TOKEN is present."
+          echo "cPanel authentication secret is present."
 
       - name: Update cPanel's clone from GitHub
         run: |
           response=$(curl -k -sS -w '\n%{http_code}' \
-            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_TOKEN }}" \
+            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_DEPLOY || secrets.CPANEL_TOKEN }}" \
             "${CPANEL_HOST}/execute/VersionControl/update?repository_root=${REPOSITORY_ROOT}&branch=main")
           status="${response##*$'\n'}"
           body="${response%$'\n'*}"
@@ -45,7 +44,7 @@ jobs:
       - name: Run the deploy task (.cpanel.yml)
         run: |
           response=$(curl -k -sS -w '\n%{http_code}' \
-            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_TOKEN }}" \
+            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_DEPLOY || secrets.CPANEL_TOKEN }}" \
             "${CPANEL_HOST}/execute/VersionControlDeployment/create?repository_root=${REPOSITORY_ROOT}")
           status="${response##*$'\n'}"
           body="${response%$'\n'*}"

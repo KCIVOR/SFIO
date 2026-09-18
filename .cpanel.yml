@@ -1,0 +1,7 @@
+---
+deployment:
+  tasks:
+    - export REPOPATH=/home/starfleetinnotec/repositories/SFIO
+    - export DEPLOYPATH=/home/starfleetinnotec/public_html/Starfleet-Innotech-Inc/
+    - /bin/mkdir -p $DEPLOYPATH
+    - /usr/bin/rsync -a --delete --exclude='.git' --exclude='.github' --exclude='.cpanel.yml' --exclude='.gitignore' --exclude='.env' --exclude='.env.example' --exclude='*.md' --exclude='start-server.bat' --exclude='.DS_Store' --exclude='Thumbs.db' --exclude='desktop.ini' --exclude='.ftpquota' $REPOPATH/ $DEPLOYPATH/

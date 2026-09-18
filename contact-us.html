@@ -526,5 +526,113 @@ $('#division-left-arrow').click(function() {
 
 
 	});
-  </script> --></body></html>
+  </script> -->
+  <script>
+  (function() {
+    document.addEventListener('DOMContentLoaded', function() {
+      var form = document.getElementById('wf-form-Contact-Us');
+      if (!form) return;
+
+      var parentBlock = form.closest('.w-form') || form.parentElement;
+      var doneBox = parentBlock ? parentBlock.querySelector('.w-form-done') : null;
+      var failBox = parentBlock ? parentBlock.querySelector('.w-form-fail') : null;
+      var submitBtn = form.querySelector('.contact-submit-btn') || form.querySelector('input[type="submit"]');
+
+      // Add honeypot spam protection field
+      var honeypot = document.createElement('input');
+      honeypot.type = 'text';
+      honeypot.name = '_gotcha';
+      honeypot.style.display = 'none';
+      honeypot.tabIndex = -1;
+      honeypot.autocomplete = 'off';
+      form.appendChild(honeypot);
+
+      // Ensure message field is marked required
+      var messageField = form.querySelector('#Message') || form.querySelector('[name="Message"]');
+      if (messageField) {
+        messageField.required = true;
+      }
+
+      // Hide reCAPTCHA widget on localhost to prevent domain mismatch error display
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        var recaptchaCon = form.querySelector('.re__con');
+        if (recaptchaCon) {
+          recaptchaCon.style.display = 'none';
+        }
+      }
+
+      // Intercept submit event before Webflow
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        if (!form.checkValidity()) {
+          form.reportValidity();
+          return false;
+        }
+
+        var defaultBtnText = submitBtn ? (submitBtn.value || 'Send message') : 'Send message';
+        var waitText = submitBtn ? (submitBtn.getAttribute('data-wait') || 'Please wait...') : 'Please wait...';
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.value = waitText;
+        }
+
+        if (failBox) failBox.style.display = 'none';
+
+        var formData = new FormData(form);
+
+        fetch('send-mail.php', {
+          method: 'POST',
+          body: formData
+        })
+        .then(function(res) {
+          return res.json().then(function(data) {
+            return { ok: res.ok, status: res.status, data: data };
+          }).catch(function() {
+            return { ok: res.ok, status: res.status, data: null };
+          });
+        })
+        .then(function(result) {
+          if (result.ok && result.data && result.data.success) {
+            form.style.display = 'none';
+            if (doneBox) {
+              doneBox.style.display = 'block';
+              var successText = doneBox.querySelector('.success__text');
+              if (successText && successText.innerHTML.indexOf('â€™') !== -1) {
+                successText.innerHTML = successText.innerHTML.replace(/â€™/g, "'");
+              }
+            }
+          } else {
+            var errMsg = (result.data && result.data.message) ? result.data.message : 'Oops! Something went wrong while submitting the form.';
+            if (failBox) {
+              var failTextEl = failBox.querySelector('div') || failBox;
+              failTextEl.textContent = errMsg;
+              failBox.style.display = 'block';
+            }
+            if (submitBtn) {
+              submitBtn.disabled = false;
+              submitBtn.value = defaultBtnText;
+            }
+          }
+        })
+        .catch(function(err) {
+          if (failBox) {
+            var failTextEl = failBox.querySelector('div') || failBox;
+            failTextEl.textContent = 'Network error. Please check your connection and try again.';
+            failBox.style.display = 'block';
+          }
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.value = defaultBtnText;
+          }
+        });
+
+        return false;
+      }, true);
+    });
+  })();
+  </script>
+</body></html>
 

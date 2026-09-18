@@ -1,0 +1,45 @@
+name: Auto Deploy to Production (cPanel)
+
+# Ships production files by instructing cPanel (over its HTTPS UAPI) to
+# pull the latest commit and execute the .cpanel.yml deployment task.
+# The actual file synchronization occurs locally on the server via rsync.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+concurrency:
+  group: production-deployment
+  cancel-in-progress: true
+
+env:
+  CPANEL_HOST: ${{ vars.CPANEL_HOST || secrets.CPANEL_HOST || 'https://srv489465.hstgr.cloud:2083' }}
+  CPANEL_USERNAME: starfleetinnotec
+  REPOSITORY_ROOT: /home/starfleetinnotec/repositories/SFIO
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update cPanel's clone from GitHub
+        run: |
+          response=$(curl -k -sS -w '\n%{http_code}' \
+            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_TOKEN }}" \
+            "${CPANEL_HOST}/execute/VersionControl/update?repository_root=${REPOSITORY_ROOT}&branch=main")
+          status="${response##*$'\n'}"
+          body="${response%$'\n'*}"
+          echo "$body"
+          [ "$status" = "200" ] || { echo "::error::cPanel update call returned HTTP $status"; exit 1; }
+          echo "$body" | jq -e '.status == 1' > /dev/null || { echo "::error::cPanel reported the update failed – see response body above"; exit 1; }
+
+      - name: Run the deploy task (.cpanel.yml)
+        run: |
+          response=$(curl -k -sS -w '\n%{http_code}' \
+            -H "Authorization: cpanel ${CPANEL_USERNAME}:${{ secrets.CPANEL_TOKEN }}" \
+            "${CPANEL_HOST}/execute/VersionControlDeployment/create?repository_root=${REPOSITORY_ROOT}")
+          status="${response##*$'\n'}"
+          body="${response%$'\n'*}"
+          echo "$body"
+          [ "$status" = "200" ] || { echo "::error::cPanel deploy call returned HTTP $status"; exit 1; }
+          echo "$body" | jq -e '.status == 1' > /dev/null || { echo "::error::cPanel reported the deploy failed – see response body above"; exit 1; }

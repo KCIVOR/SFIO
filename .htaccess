@@ -1,0 +1,23 @@
+# Disable directory browsing
+Options -Indexes
+
+# Protect sensitive environment and configuration files from direct browser access
+<FilesMatch "^\.(env|git|htaccess)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+<FilesMatch "^(composer\.json|composer\.lock|\.gitignore)">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Apache 2.4+ compatibility
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.(env|git|htaccess)">
+        Require all denied
+    </FilesMatch>
+    <FilesMatch "^(composer\.json|composer\.lock|\.gitignore)">
+        Require all denied
+    </FilesMatch>
+</IfModule>

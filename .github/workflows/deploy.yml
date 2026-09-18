@@ -22,6 +22,15 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.CPANEL_TOKEN }}" ]; then
+            echo "::error::CPANEL_TOKEN secret is empty or inaccessible in this workflow job!"
+            echo "Ensure CPANEL_TOKEN is added to: Settings -> Secrets and variables -> Actions -> Repository secrets."
+            exit 1
+          fi
+          echo "CPANEL_TOKEN is present."
+
       - name: Update cPanel's clone from GitHub
         run: |
           response=$(curl -k -sS -w '\n%{http_code}' \

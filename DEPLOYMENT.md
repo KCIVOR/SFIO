@@ -37,7 +37,7 @@ GitHub Actions (.github/workflows/deploy.yml)
 
 | Parameter | Value |
 |---|---|
-| **cPanel Server URL** | `https://srv489465.hstgr.cloud:2083` (or via `CPANEL_HOST`) |
+| **cPanel Server URL** | `https://89.116.134.177:2083` (or via `CPANEL_HOST`) |
 | **cPanel User** | `starfleetinnotec` |
 | **cPanel Repository Path** | `/home/starfleetinnotec/repositories/SFIO` |
 | **Live Target Directory** | `/home/starfleetinnotec/public_html/` |

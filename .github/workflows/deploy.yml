@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CPANEL_HOST: ${{ vars.CPANEL_HOST || secrets.CPANEL_HOST || 'https://srv489465.hstgr.cloud:2083' }}
+  CPANEL_HOST: ${{ vars.CPANEL_HOST || secrets.CPANEL_HOST || 'https://89.116.134.177:2083' }}
   CPANEL_USERNAME: starfleetinnotec
   REPOSITORY_ROOT: /home/starfleetinnotec/repositories/SFIO
 

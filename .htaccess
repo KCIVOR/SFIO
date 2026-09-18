@@ -8,6 +8,9 @@ RewriteRule ^(.*)$ $1.html [L]
 # Disable directory browsing
 Options -Indexes
 
+# Set default charset
+AddDefaultCharset UTF-8
+
 # Protect sensitive environment and configuration files from direct browser access
 <FilesMatch "^\.(env|git|htaccess)">
     Order allow,deny
